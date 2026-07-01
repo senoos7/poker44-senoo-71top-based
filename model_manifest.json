@@ -1,0 +1,21 @@
+{
+  "schema_version": "1",
+  "open_source": true,
+  "model_name": "poker44-bump-robust",
+  "model_version": "bump-topk-v1",
+  "framework": "tree-ensemble+topk-safety-budget",
+  "license": "MIT",
+  "inference_mode": "local-joblib",
+  "training_data_sources": ["released_training_benchmark"],
+  "private_data_attestation": "No validator-private data used; released benchmark labels only.",
+  "implementation_files": [
+    "neurons/miner.py",
+    "poker44_bump/model.py",
+    "poker44_bump/features.py",
+    "poker44_bump/features_ext.py",
+    "poker44_bump/payload_view.py"
+  ],
+  "repo_url": "https://github.com/yourname/poker44-skip",
+  "repo_commit": "set-via-POKER44_MANIFEST_REPO_COMMIT-env-var",
+  "_note": "repo_url and repo_commit are set per-miner via env vars in run_miners.sh"
+}

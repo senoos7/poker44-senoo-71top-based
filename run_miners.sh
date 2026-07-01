@@ -1,0 +1,333 @@
+#!/usr/bin/env bash
+# run_miners.sh — Start / stop / restart multiple Poker44 skip miners via PM2.
+#
+# This script replaces all individual ecosystem.config.js files.
+# Each add_miner block is one miner instance. Edit the registry section
+# below to configure your fleet, then run:
+#
+#   ./run_miners.sh start      # start all miners
+#   ./run_miners.sh stop       # stop (delete) all miners
+#   ./run_miners.sh restart    # stop then start all miners
+#   ./run_miners.sh status     # show pm2 ls
+#   ./run_miners.sh logs       # list configured miners
+#   ./run_miners.sh logs <name> # tail logs for one miner
+#
+# IMPORTANT: do not put # comment lines inside add_miner \ continuations;
+# bash treats the continued line as a comment and drops all arguments.
+
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="${SCRIPT_DIR}"
+MINER_SCRIPT="${REPO_ROOT}/neurons/miner.py"
+PYTHON_BIN="${REPO_ROOT}/.venv/bin/python"
+
+# =============================================================================
+# GLOBAL SETTINGS
+# =============================================================================
+NETUID="${NETUID:-126}"
+NETWORK="${NETWORK:-finney}"
+LOG_LEVEL="${LOG_LEVEL:-info}"
+
+# Validator hotkey allowlist — shared by every miner.
+ALLOWED_VALIDATOR_HOTKEYS=(
+  5E2LP6EnZ54m3wS8s1yPvD5c3xo71kQroBw7aUVK32TKeZ5u
+  5EP9fmtknrTnDhQmLRY9ciFYoM7YZM8rPWvQ9J7yywEsn126
+  5FxQcdsCXcNjWowQ63Y2oeMhN3JRQksejV3aHRr4XmtknM2k
+  5HWe7T96SrY4vRvaLmSoriUJ2CGvhRc559U1vZ1pNPuyz2VA
+  5FZD47WhA1UaVicYAr7pGnWb2YQLMD7uViipDYN2r1AJ5ggD
+  5Hftk9jrMGSJtKBPWkkAkU53FUSr2BqHGPCThg7mbob3hEq1
+  5CsvRJXuR955WojnGMdok1hbhffZyB4N5ocrv82f3p5A2zVp
+  5HmkWGB5PVzKCNLB4QxWWHFVEHPAbKKxGyoXW7Evs38gs126
+  5G9hfkx9wGB1CLMT9WXkpHSAiYzjZb5o1Boyq4KAdDhjwrc5
+)
+
+# Defaults applied to every miner unless overridden in that miner's ENV block.
+# POKER44_CAPTURE=1 enables live query capture to live_capture/*.jsonl
+DEFAULT_MINER_ENV=(
+  POKER44_CAPTURE=1
+)
+
+# =============================================================================
+# INTERNAL STATE — do not edit
+# =============================================================================
+MINER_PM2_NAMES=()
+MINER_WALLETS=()
+MINER_HOTKEYS=()
+MINER_PORTS=()
+MINER_MODELS=()
+MINER_MANIFEST_REPO_URLS=()
+MINER_MANIFEST_REPO_COMMITS=()
+MINER_MANIFEST_MODEL_NAMES=()
+MINER_MANIFEST_MODEL_VERSIONS=()
+MINER_ENV_BLOCKS=()
+
+# =============================================================================
+# add_miner FUNCTION
+# =============================================================================
+# Positional arguments:
+#   [1] pm2_name        PM2 process name (pm2 ls / pm2 logs <name>)
+#   [2] wallet          coldkey (--wallet.name)
+#   [3] hotkey          hotkey (--wallet.hotkey)
+#   [4] port            axon port (--axon.port); must be unique per miner
+#   [5] model_file      basename under models/ or repo-relative path
+#                         e.g. "bump_model_v19.joblib"
+#                         e.g. "models/bump_model_v10.joblib"
+#   [6] manifest_repo_url     POKER44_MANIFEST_REPO_URL  (hardcoded in manifest)
+#   [7] manifest_repo_commit  POKER44_MANIFEST_REPO_COMMIT (hardcoded in manifest)
+#   [8] manifest_model_name   POKER44_MANIFEST_MODEL_NAME
+#   [9] manifest_model_version POKER44_MANIFEST_MODEL_VERSION
+#   [10] MINER_ENV heredoc   per-miner env overrides (key=value, one per line)
+#
+# The env heredoc supports any env var the miner understands, e.g.:
+#   POKER44_TOPK_FRAC=0.15          # topk head positive fraction (default 0.15)
+#   POKER44_CAPTURE=0               # disable live capture for this miner
+#   POKER44_MANIFEST_FRAMEWORK=...  # override framework string in manifest
+#
+add_miner() {
+  local pm2_name="$1"
+  local wallet="$2"
+  local hotkey="$3"
+  local port="$4"
+  local model_file="$5"
+  local manifest_repo_url="$6"
+  local manifest_repo_commit="$7"
+  local manifest_model_name="$8"
+  local manifest_model_version="$9"
+
+  MINER_PM2_NAMES+=("$pm2_name")
+  MINER_WALLETS+=("$wallet")
+  MINER_HOTKEYS+=("$hotkey")
+  MINER_PORTS+=("$port")
+  MINER_MODELS+=("$model_file")
+  MINER_MANIFEST_REPO_URLS+=("$manifest_repo_url")
+  MINER_MANIFEST_REPO_COMMITS+=("$manifest_repo_commit")
+  MINER_MANIFEST_MODEL_NAMES+=("$manifest_model_name")
+  MINER_MANIFEST_MODEL_VERSIONS+=("$manifest_model_version")
+
+  local env_block=""
+  if [[ $# -gt 9 ]]; then
+    env_block="${10}"
+  else
+    env_block="$(cat)"
+  fi
+  MINER_ENV_BLOCKS+=("$env_block")
+}
+
+# =============================================================================
+# MINER REGISTRY
+# =============================================================================
+# Duplicate and edit add_miner blocks to add more miners.
+# Keep all model versions, hotkeys, and ports unique.
+#
+# Fleet A/B strategy (mirrors top-miner research):
+#   sk-1 = v19  sanitization-invariant trees  (production workhorse)
+#   sk-2 = v10  diverse averaged ensemble      (best cross-date AP baseline)
+#   sk-3 = v5   full stacked pipeline          (leader vendored baseline)
+#   sk-4 = v22  sequence transformer           (live-only gamble / research)
+
+# --- Miner 1: sk-1 — v19 sanitization-invariant trees, topk frac=0.15 ---
+add_miner \
+  "sk-1" \
+  "skip" \
+  "sk1" \
+  "11106" \
+  "bump_model_v19.joblib" \
+  "https://github.com/yourname/poker44-skip" \
+  "0000000" \
+  "poker44-bump-robust" \
+  "bump-saninv-v19" \
+  <<'MINER_ENV'
+POKER44_TOPK_FRAC=0.15
+MINER_ENV
+
+# --- Miner 2: sk-2 — v10 diverse averaged ensemble, topk frac=0.15 ---
+add_miner \
+  "sk-2" \
+  "skip" \
+  "sk2" \
+  "11107" \
+  "bump_model_v10.joblib" \
+  "https://github.com/yourname/poker44-skip" \
+  "0000000" \
+  "poker44-bump-robust" \
+  "bump-ensemble-v10" \
+  <<'MINER_ENV'
+POKER44_TOPK_FRAC=0.15
+MINER_ENV
+
+# --- Miner 3: sk-3 — v5 full stacked pipeline, topk frac=0.15 ---
+add_miner \
+  "sk-3" \
+  "skip" \
+  "sk3" \
+  "11108" \
+  "bump_model_v5.joblib" \
+  "https://github.com/yourname/poker44-skip" \
+  "0000000" \
+  "poker44-bump-robust" \
+  "bump-stacked-v5" \
+  <<'MINER_ENV'
+POKER44_TOPK_FRAC=0.15
+MINER_ENV
+
+# --- Miner 4: sk-4 — v22 sequence transformer, topk frac=0.15 ---
+add_miner \
+  "sk-4" \
+  "skip" \
+  "sk4" \
+  "11109" \
+  "bump_model_v22.joblib" \
+  "https://github.com/yourname/poker44-skip" \
+  "0000000" \
+  "poker44-bump-robust" \
+  "bump-seq-v22" \
+  <<'MINER_ENV'
+POKER44_TOPK_FRAC=0.15
+MINER_ENV
+
+# Add more miners below by copying an add_miner block and editing the fields.
+# Remember: each miner needs a unique pm2_name, hotkey, and port.
+
+# =============================================================================
+# RUNNER — no need to edit below this line
+# =============================================================================
+
+die() { echo "Error: $*" >&2; exit 1; }
+
+require_pm2()  { command -v pm2 >/dev/null 2>&1 || die "pm2 is not installed"; }
+require_script() { [[ -f "$MINER_SCRIPT" ]] || die "Miner script not found: $MINER_SCRIPT"; }
+require_python() { [[ -x "$PYTHON_BIN" ]] || die "Python venv not found: $PYTHON_BIN"; }
+
+model_path_for() {
+  local mf="$1"
+  if [[ "$mf" == */* ]]; then
+    echo "${REPO_ROOT}/${mf}"
+  else
+    echo "${REPO_ROOT}/models/${mf}"
+  fi
+}
+
+apply_env_line() {
+  local line="$1"
+  line="${line%%#*}"
+  line="$(echo "$line" | xargs)"
+  [[ -z "$line" ]] && return 0
+  [[ "$line" == *=* ]] || die "Invalid env line (expected KEY=VALUE): $line"
+  export "$line"
+}
+
+apply_env_block() {
+  local block="$1"
+  local line
+  while IFS= read -r line || [[ -n "$line" ]]; do
+    apply_env_line "$line"
+  done <<<"$block"
+}
+
+start_one_miner() {
+  local index="$1"
+  local pm2_name="${MINER_PM2_NAMES[$index]}"
+  local wallet="${MINER_WALLETS[$index]}"
+  local hotkey="${MINER_HOTKEYS[$index]}"
+  local port="${MINER_PORTS[$index]}"
+  local model_file="${MINER_MODELS[$index]}"
+  local manifest_repo_url="${MINER_MANIFEST_REPO_URLS[$index]}"
+  local manifest_repo_commit="${MINER_MANIFEST_REPO_COMMITS[$index]}"
+  local manifest_model_name="${MINER_MANIFEST_MODEL_NAMES[$index]}"
+  local manifest_model_version="${MINER_MANIFEST_MODEL_VERSIONS[$index]}"
+  local env_block="${MINER_ENV_BLOCKS[$index]}"
+  local model_path
+  model_path="$(model_path_for "$model_file")"
+
+  (
+    export PYTHONPATH="${REPO_ROOT}"
+
+    # Apply global defaults
+    for line in "${DEFAULT_MINER_ENV[@]}"; do
+      apply_env_line "$line"
+    done
+
+    # Apply per-miner manifest identity (hardcoded, not from git)
+    export POKER44_BUMP_MODEL="${model_path}"
+    export POKER44_MANIFEST_REPO_URL="${manifest_repo_url}"
+    export POKER44_MANIFEST_REPO_COMMIT="${manifest_repo_commit}"
+    export POKER44_MANIFEST_MODEL_NAME="${manifest_model_name}"
+    export POKER44_MANIFEST_MODEL_VERSION="${manifest_model_version}"
+
+    # Apply per-miner env overrides
+    apply_env_block "$env_block"
+
+    [[ -f "$POKER44_BUMP_MODEL" ]] || \
+      echo "Warning: model not found for ${pm2_name}: ${POKER44_BUMP_MODEL}" >&2
+
+    pm2 delete "$pm2_name" 2>/dev/null || true
+
+    pm2 start "$MINER_SCRIPT" \
+      --interpreter "$PYTHON_BIN" \
+      --name "$pm2_name" \
+      --cwd "$REPO_ROOT" \
+      --no-autorestart false \
+      --max-restarts 50 \
+      --restart-delay 5000 \
+      -- \
+      --netuid "$NETUID" \
+      --wallet.name "$wallet" \
+      --wallet.hotkey "$hotkey" \
+      --subtensor.network "$NETWORK" \
+      --axon.port "$port" \
+      --logging."$LOG_LEVEL" \
+      --blacklist.force_validator_permit \
+      --blacklist.allowed_validator_hotkeys "${ALLOWED_VALIDATOR_HOTKEYS[@]}"
+  )
+
+  echo "Started ${pm2_name} | wallet=${wallet}/${hotkey} port=${port} model=${model_path}"
+}
+
+stop_one_miner() {
+  pm2 delete "$1" 2>/dev/null || true
+  echo "Stopped $1"
+}
+
+start_all() {
+  require_pm2; require_script; require_python
+  [[ ${#MINER_PM2_NAMES[@]} -gt 0 ]] || die "No miners configured. Add add_miner blocks above."
+  for i in "${!MINER_PM2_NAMES[@]}"; do
+    start_one_miner "$i"
+  done
+  pm2 save
+  echo ""
+  echo "All ${#MINER_PM2_NAMES[@]} miner(s) started. View: pm2 ls"
+}
+
+stop_all() {
+  require_pm2
+  for name in "${MINER_PM2_NAMES[@]}"; do
+    stop_one_miner "$name"
+  done
+  pm2 save
+}
+
+status_all() { require_pm2; pm2 ls; }
+
+logs_one() {
+  require_pm2
+  local target="${1:-}"
+  if [[ -n "$target" ]]; then
+    pm2 logs "$target"
+    return
+  fi
+  echo "Configured miners:"
+  printf '  - %s\n' "${MINER_PM2_NAMES[@]}"
+  echo "Run: $0 logs <pm2-name>"
+}
+
+ACTION="${1:-start}"
+case "$ACTION" in
+  start)   start_all ;;
+  stop)    stop_all ;;
+  restart) stop_all; start_all ;;
+  status)  status_all ;;
+  logs)    logs_one "${2:-}" ;;
+  *)       die "Unknown action: $ACTION (use start|stop|restart|status|logs)" ;;
+esac
