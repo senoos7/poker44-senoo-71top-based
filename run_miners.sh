@@ -158,7 +158,7 @@ add_miner \
   "pkn-1" \
   "poker" \
   "pkn1" \
-  "1111" \
+  "11101" \
   "bump_model_v10.joblib" \
   "${MANIFEST_REPO_V2}" \
   "${MANIFEST_COMMIT_V2}" \
@@ -173,7 +173,7 @@ add_miner \
   "pkn-2" \
   "poker" \
   "pkn2" \
-  "6006" \
+  "11102" \
   "bump_model_v10-4.joblib" \
   "${MANIFEST_REPO_SOTA_V3}" \
   "${MANIFEST_COMMIT_SOTA_V3}" \
@@ -188,7 +188,7 @@ add_miner \
   "pkn-3" \
   "poker" \
   "pkn3" \
-  "8080" \
+  "11103" \
   "bump_model_v10-4.joblib" \
   "${MANIFEST_REPO_BENCHMARK_V5}" \
   "${MANIFEST_COMMIT_BENCHMARK_V5}" \
@@ -203,7 +203,7 @@ add_miner \
   "pkn-4" \
   "poker1" \
   "pkn4" \
-  "8384" \
+  "11104" \
   "bump_model_v10-4.joblib" \
   "${MANIFEST_REPO_SUPERVISED_V6}" \
   "${MANIFEST_COMMIT_SUPERVISED_V6}" \
@@ -218,7 +218,7 @@ add_miner \
   "pkn-5" \
   "poker1" \
   "pkn5" \
-  "18675" \
+  "11105" \
   "bump_model_v10-4v2.joblib" \
   "${MANIFEST_REPO_TUNED_V7}" \
   "${MANIFEST_COMMIT_TUNED_V7}" \
@@ -229,8 +229,6 @@ POKER44_TOPK_FRAC=0.13
 MINER_ENV
 
 # --- Miner 6: pkn-6 — v10-4v3 (feat_v3+v10-4), frac=0.13, best AP+Reward ---
-# Vast.ai maps external 24979 → container 72299 (>65535, invalid TCP port).
-# socat bridges container 72299 → localhost:11106 so the axon can use 11106.
 add_miner \
   "pkn-6" \
   "poker1" \
@@ -243,7 +241,6 @@ add_miner \
   "v10-4v3" \
   <<'MINER_ENV'
 POKER44_TOPK_FRAC=0.13
-POKER44_AXON_EXTERNAL_PORT=24979
 MINER_ENV
 
 # Add more miners below by copying an add_miner block and editing the fields.
@@ -301,14 +298,9 @@ start_one_miner() {
   model_path="$(model_path_for "$model_file")"
 
   # Resolve Vast.ai NAT external port/IP.
-  # Primary: VAST_TCP_PORT_<internal>=<external> injected by Vast.ai.
-  # Fallback: POKER44_AXON_EXTERNAL_PORT in the per-miner env block (used when
-  # the internal port is invalid for axon, e.g. socat bridge for pkn-6).
+  # VAST_TCP_PORT_<internal>=<external> is injected by Vast.ai for each mapped port.
   local vast_env_key="VAST_TCP_PORT_${port}"
-  # Read optional override from env block before constructing external_port
-  # (grep returns 1 when no match; suppress with || true to avoid set -e abort)
-  local _ext_override; _ext_override=$(echo "${MINER_ENV_BLOCKS[$index]}" | grep -m1 '^POKER44_AXON_EXTERNAL_PORT=' | cut -d= -f2- || true)
-  local external_port="${_ext_override:-${!vast_env_key:-$port}}"
+  local external_port="${!vast_env_key:-$port}"
   local external_ip="${PUBLIC_IPADDR:-}"
 
   (
@@ -362,33 +354,9 @@ stop_one_miner() {
   echo "Stopped $1"
 }
 
-start_socat_bridges() {
-  # Vast.ai maps external 24979 → container 72299, but 72299 > 65535 (invalid TCP).
-  # socat bridges 72299 → 127.0.0.1:11106 so Vast.ai traffic reaches pkn-6's axon.
-  local vast_internal=72299
-  local axon_port=11106
-  local pidfile="/tmp/socat-bridge-${vast_internal}.pid"
-
-  # Kill any existing bridge
-  if [[ -f "$pidfile" ]]; then
-    kill "$(cat "$pidfile")" 2>/dev/null || true
-    rm -f "$pidfile"
-  fi
-  pkill -f "socat.*${vast_internal}" 2>/dev/null || true
-
-  if command -v socat >/dev/null 2>&1; then
-    socat TCP-LISTEN:${vast_internal},fork,reuseaddr TCP:127.0.0.1:${axon_port} &
-    echo $! > "$pidfile"
-    echo "Bridge started (pid=$(cat "$pidfile")): ${vast_internal} → 127.0.0.1:${axon_port}  [external 24979 → axon ${axon_port}]"
-  else
-    echo "Warning: socat not found — bridge skipped for port ${vast_internal}" >&2
-  fi
-}
-
 start_all() {
   require_pm2; require_script; require_python
   [[ ${#MINER_PM2_NAMES[@]} -gt 0 ]] || die "No miners configured. Add add_miner blocks above."
-  start_socat_bridges
   for i in "${!MINER_PM2_NAMES[@]}"; do
     start_one_miner "$i"
   done
