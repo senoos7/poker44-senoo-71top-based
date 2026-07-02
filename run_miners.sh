@@ -44,9 +44,29 @@ ALLOWED_VALIDATOR_HOTKEYS=(
 
 # Defaults applied to every miner unless overridden in that miner's ENV block.
 # POKER44_CAPTURE=1 enables live query capture to live_capture/*.jsonl
+# BT_NO_PARSE_CLI_ARGS=false is required so bittensor actually reads --wallet.name
+# etc. from the command line (new bittensor versions disable CLI parsing by default).
 DEFAULT_MINER_ENV=(
   POKER44_CAPTURE=1
+  BT_NO_PARSE_CLI_ARGS=false
+  OMP_NUM_THREADS=1
+  OPENBLAS_NUM_THREADS=1
+  MKL_NUM_THREADS=1
 )
+
+# Manifest identities broadcast to validators (5 unique repo+commit pairs).
+# Same values as poker_demo_2/multiple-miner-run.sh
+MANIFEST_PUBLIC_NAME="poker44-sota-bot-detection"
+MANIFEST_REPO_V2="https://github.com/senoos7/poker44-senoo-v2"
+MANIFEST_COMMIT_V2="74cbad2"
+MANIFEST_REPO_SOTA_V3="https://github.com/senoos7/poker44-senoo-sota-v3"
+MANIFEST_COMMIT_SOTA_V3="1f534ce"
+MANIFEST_REPO_BENCHMARK_V5="https://github.com/senoos7/poker44-senoo-benchmark-v5"
+MANIFEST_COMMIT_BENCHMARK_V5="70788bb"
+MANIFEST_REPO_SUPERVISED_V6="https://github.com/senoos7/poker44-senoo-supervised-v6"
+MANIFEST_COMMIT_SUPERVISED_V6="b7750b6"
+MANIFEST_REPO_TUNED_V7="https://github.com/senoos7/poker44-senoo-tuned-v7"
+MANIFEST_COMMIT_TUNED_V7="8acd9b0"
 
 # =============================================================================
 # INTERNAL STATE — do not edit
@@ -117,73 +137,113 @@ add_miner() {
 # =============================================================================
 # MINER REGISTRY
 # =============================================================================
-# Duplicate and edit add_miner blocks to add more miners.
-# Keep all model versions, hotkeys, and ports unique.
+# Fleet configuration — 6 miners across 2 wallets (poker, poker1).
+# Model progression: v10 → v10-4 (frac sweep) → v10-4v2 → v10-4v3
 #
-# Fleet A/B strategy (mirrors top-miner research):
-#   sk-1 = v19  sanitization-invariant trees  (production workhorse)
-#   sk-2 = v10  diverse averaged ensemble      (best cross-date AP baseline)
-#   sk-3 = v5   full stacked pipeline          (leader vendored baseline)
-#   sk-4 = v22  sequence transformer           (live-only gamble / research)
+#   pkn-1  poker  pkn1  11101  bump_model_v10       frac=0.17  (v10 baseline)
+#   pkn-2  poker  pkn2  11102  bump_model_v10-4     frac=0.17  (v10-4, conservative)
+#   pkn-3  poker  pkn3  11103  bump_model_v10-4     frac=0.19  (v10-4, moderate)
+#   pkn-4  poker1 pkn4  11104  bump_model_v10-4     frac=0.22  (v10-4, liberal)
+#   pkn-5  poker1 pkn5  11105  bump_model_v10-4v2   frac=0.13  (feat_v2, zero cliffs)
+#   pkn-6  poker1 pkn6  11106  bump_model_v10-4v3   frac=0.13  (feat_v3, best AP+Reward)
+#
+# manifest_model_version values (arg 9) — shortened from full names for brevity:
+#   "v10"      (was: bump-ensemble-v10)
+#   "v10-4"    (was: bump-ensemble-v10-4)
+#   "v10-4v2"  (was: bump-ensemble-v10-4v2)
+#   "v10-4v3"  (was: bump-ensemble-v10-4v3)
 
-# --- Miner 1: sk-1 — v19 sanitization-invariant trees, topk frac=0.15 ---
+# --- Miner 1: pkn-1 — v10 diverse averaged ensemble, frac=0.17 ---
 add_miner \
-  "sk-1" \
-  "skip" \
-  "sk1" \
-  "11106" \
-  "bump_model_v19.joblib" \
-  "https://github.com/yourname/poker44-skip" \
-  "0000000" \
-  "poker44-bump-robust" \
-  "bump-saninv-v19" \
-  <<'MINER_ENV'
-POKER44_TOPK_FRAC=0.15
-MINER_ENV
-
-# --- Miner 2: sk-2 — v10 diverse averaged ensemble, topk frac=0.15 ---
-add_miner \
-  "sk-2" \
-  "skip" \
-  "sk2" \
-  "11107" \
+  "pkn-1" \
+  "poker" \
+  "pkn1" \
+  "1111" \
   "bump_model_v10.joblib" \
-  "https://github.com/yourname/poker44-skip" \
-  "0000000" \
-  "poker44-bump-robust" \
-  "bump-ensemble-v10" \
+  "${MANIFEST_REPO_V2}" \
+  "${MANIFEST_COMMIT_V2}" \
+  "${MANIFEST_PUBLIC_NAME}" \
+  "v10" \
   <<'MINER_ENV'
-POKER44_TOPK_FRAC=0.15
+POKER44_TOPK_FRAC=0.17
 MINER_ENV
 
-# --- Miner 3: sk-3 — v5 full stacked pipeline, topk frac=0.15 ---
+# --- Miner 2: pkn-2 — v10-4 large diverse ensemble, frac=0.17 ---
 add_miner \
-  "sk-3" \
-  "skip" \
-  "sk3" \
-  "11108" \
-  "bump_model_v5.joblib" \
-  "https://github.com/yourname/poker44-skip" \
-  "0000000" \
-  "poker44-bump-robust" \
-  "bump-stacked-v5" \
+  "pkn-2" \
+  "poker" \
+  "pkn2" \
+  "6006" \
+  "bump_model_v10-4.joblib" \
+  "${MANIFEST_REPO_SOTA_V3}" \
+  "${MANIFEST_COMMIT_SOTA_V3}" \
+  "${MANIFEST_PUBLIC_NAME}" \
+  "v10-4" \
   <<'MINER_ENV'
-POKER44_TOPK_FRAC=0.15
+POKER44_TOPK_FRAC=0.17
 MINER_ENV
 
-# --- Miner 4: sk-4 — v22 sequence transformer, topk frac=0.15 ---
+# --- Miner 3: pkn-3 — v10-4 large diverse ensemble, frac=0.19 ---
 add_miner \
-  "sk-4" \
-  "skip" \
-  "sk4" \
-  "11109" \
-  "bump_model_v22.joblib" \
-  "https://github.com/yourname/poker44-skip" \
-  "0000000" \
-  "poker44-bump-robust" \
-  "bump-seq-v22" \
+  "pkn-3" \
+  "poker" \
+  "pkn3" \
+  "8080" \
+  "bump_model_v10-4.joblib" \
+  "${MANIFEST_REPO_BENCHMARK_V5}" \
+  "${MANIFEST_COMMIT_BENCHMARK_V5}" \
+  "${MANIFEST_PUBLIC_NAME}" \
+  "v10-4" \
   <<'MINER_ENV'
-POKER44_TOPK_FRAC=0.15
+POKER44_TOPK_FRAC=0.19
+MINER_ENV
+
+# --- Miner 4: pkn-4 — v10-4 large diverse ensemble, frac=0.22 ---
+add_miner \
+  "pkn-4" \
+  "poker1" \
+  "pkn4" \
+  "8384" \
+  "bump_model_v10-4.joblib" \
+  "${MANIFEST_REPO_SUPERVISED_V6}" \
+  "${MANIFEST_COMMIT_SUPERVISED_V6}" \
+  "${MANIFEST_PUBLIC_NAME}" \
+  "v10-4" \
+  <<'MINER_ENV'
+POKER44_TOPK_FRAC=0.22
+MINER_ENV
+
+# --- Miner 5: pkn-5 — v10-4v2 (feat_v2+v10-4), frac=0.13 ---
+add_miner \
+  "pkn-5" \
+  "poker1" \
+  "pkn5" \
+  "18675" \
+  "bump_model_v10-4v2.joblib" \
+  "${MANIFEST_REPO_TUNED_V7}" \
+  "${MANIFEST_COMMIT_TUNED_V7}" \
+  "${MANIFEST_PUBLIC_NAME}" \
+  "v10-4v2" \
+  <<'MINER_ENV'
+POKER44_TOPK_FRAC=0.13
+MINER_ENV
+
+# --- Miner 6: pkn-6 — v10-4v3 (feat_v3+v10-4), frac=0.13, best AP+Reward ---
+# Vast.ai maps external 24979 → container 72299 (>65535, invalid TCP port).
+# socat bridges container 72299 → localhost:11106 so the axon can use 11106.
+add_miner \
+  "pkn-6" \
+  "poker1" \
+  "pkn6" \
+  "11106" \
+  "bump_model_v10-4v3.joblib" \
+  "${MANIFEST_REPO_TUNED_V7}" \
+  "${MANIFEST_COMMIT_TUNED_V7}" \
+  "${MANIFEST_PUBLIC_NAME}" \
+  "v10-4v3" \
+  <<'MINER_ENV'
+POKER44_TOPK_FRAC=0.13
+POKER44_AXON_EXTERNAL_PORT=24979
 MINER_ENV
 
 # Add more miners below by copying an add_miner block and editing the fields.
@@ -240,6 +300,17 @@ start_one_miner() {
   local model_path
   model_path="$(model_path_for "$model_file")"
 
+  # Resolve Vast.ai NAT external port/IP.
+  # Primary: VAST_TCP_PORT_<internal>=<external> injected by Vast.ai.
+  # Fallback: POKER44_AXON_EXTERNAL_PORT in the per-miner env block (used when
+  # the internal port is invalid for axon, e.g. socat bridge for pkn-6).
+  local vast_env_key="VAST_TCP_PORT_${port}"
+  # Read optional override from env block before constructing external_port
+  # (grep returns 1 when no match; suppress with || true to avoid set -e abort)
+  local _ext_override; _ext_override=$(echo "${MINER_ENV_BLOCKS[$index]}" | grep -m1 '^POKER44_AXON_EXTERNAL_PORT=' | cut -d= -f2- || true)
+  local external_port="${_ext_override:-${!vast_env_key:-$port}}"
+  local external_ip="${PUBLIC_IPADDR:-}"
+
   (
     export PYTHONPATH="${REPO_ROOT}"
 
@@ -267,21 +338,23 @@ start_one_miner() {
       --interpreter "$PYTHON_BIN" \
       --name "$pm2_name" \
       --cwd "$REPO_ROOT" \
-      --no-autorestart false \
       --max-restarts 50 \
       --restart-delay 5000 \
       -- \
       --netuid "$NETUID" \
+      --neuron.name "$pm2_name" \
       --wallet.name "$wallet" \
       --wallet.hotkey "$hotkey" \
       --subtensor.network "$NETWORK" \
       --axon.port "$port" \
+      ${external_ip:+--axon.external_ip "$external_ip"} \
+      ${external_port:+--axon.external_port "$external_port"} \
       --logging."$LOG_LEVEL" \
       --blacklist.force_validator_permit \
       --blacklist.allowed_validator_hotkeys "${ALLOWED_VALIDATOR_HOTKEYS[@]}"
   )
 
-  echo "Started ${pm2_name} | wallet=${wallet}/${hotkey} port=${port} model=${model_path}"
+  echo "Started ${pm2_name} | wallet=${wallet}/${hotkey} internal=${port} external=${external_ip}:${external_port} model=${model_path}"
 }
 
 stop_one_miner() {
@@ -289,9 +362,33 @@ stop_one_miner() {
   echo "Stopped $1"
 }
 
+start_socat_bridges() {
+  # Vast.ai maps external 24979 → container 72299, but 72299 > 65535 (invalid TCP).
+  # socat bridges 72299 → 127.0.0.1:11106 so Vast.ai traffic reaches pkn-6's axon.
+  local vast_internal=72299
+  local axon_port=11106
+  local pidfile="/tmp/socat-bridge-${vast_internal}.pid"
+
+  # Kill any existing bridge
+  if [[ -f "$pidfile" ]]; then
+    kill "$(cat "$pidfile")" 2>/dev/null || true
+    rm -f "$pidfile"
+  fi
+  pkill -f "socat.*${vast_internal}" 2>/dev/null || true
+
+  if command -v socat >/dev/null 2>&1; then
+    socat TCP-LISTEN:${vast_internal},fork,reuseaddr TCP:127.0.0.1:${axon_port} &
+    echo $! > "$pidfile"
+    echo "Bridge started (pid=$(cat "$pidfile")): ${vast_internal} → 127.0.0.1:${axon_port}  [external 24979 → axon ${axon_port}]"
+  else
+    echo "Warning: socat not found — bridge skipped for port ${vast_internal}" >&2
+  fi
+}
+
 start_all() {
   require_pm2; require_script; require_python
   [[ ${#MINER_PM2_NAMES[@]} -gt 0 ]] || die "No miners configured. Add add_miner blocks above."
+  start_socat_bridges
   for i in "${!MINER_PM2_NAMES[@]}"; do
     start_one_miner "$i"
   done

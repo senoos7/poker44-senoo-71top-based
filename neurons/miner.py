@@ -197,7 +197,7 @@ class Miner(BaseMinerNeuron):
             f"T={self.model.threshold:.4f} "
             f"feats={len(getattr(self.model, 'feature_names', []) or [])} "
             f"oof_ap={md.get('oof_ap')} "
-            f"model={self.model_path.name}"
+            f"path={self.model_path}"
         )
         bt.logging.info(
             f"Manifest | "

@@ -1,20 +1,19 @@
-"""v10 inference wrapper: a DIVERSE AVERAGED ENSEMBLE over 293 no-cx_ base feats
-+ conservative topk head (frac 0.15).
+"""v10 inference wrapper: DIVERSE AVERAGED ENSEMBLE over 416 features_v3 feats
++ conservative topk head (frac 0.13, zero cliffs across all LODO dates).
 
-phasberg's inference._raw_model_scores is a weighted ensemble (models x weights,
-averaged); their monotonic score transforms wash out under the topk head, so the
-only structural lever is the ensembling. Combined with our live A/B findings
-(simpler generalizes better live; cx_ and recall-boost hurt), v10 = a simple
-weighted AVERAGE of diverse base learners (LightGBM seeds/regs + ExtraTrees + RF),
-NO meta-learner (avoids the stack meta overfitting), NO cx_ features. Averaging
-reduces variance -> the cure for the benchmark->live gap. Picklable, drop-in.
+v10-4v3 stack:
+  features : features_v3 (416 feats — superset of v2 with bet-snap, bigram entropy,
+              cross-hand consistency, compound-bot-index, FPR-guard rates)
+  ensemble : 3×LGB + 2×XGB + ET + RF (7 estimators, strong regularisation)
+  topk_frac: 0.13  (eliminates the Jun-1 FPR cliff present at frac=0.15)
+  LODO     : AP=0.9352  Reward=0.9352  Cliffs=0  (37 dates, v1.12 only)
 """
 from __future__ import annotations
 import os
 from typing import Any, Dict, List, Sequence
 import numpy as np
 
-from poker44_ml.features import chunk_features as _base_cf   # 293 base feats, NO cx_
+from poker44_ml.features_v3 import chunk_features as _base_cf   # 416 base feats (v3), NO cx_
 from poker44_bump.model_v5 import _topk_squeeze
 
 
@@ -26,7 +25,7 @@ class V10Model:
         self.estimators = list(estimators)
         self.feature_names = list(feature_names)
         self.weights = list(weights) if weights is not None else [1.0] * len(self.estimators)
-        self.topk_cfg = dict(topk_cfg or {"positive_fraction": 0.15})
+        self.topk_cfg = dict(topk_cfg or {"positive_fraction": 0.13})
         self.metadata = dict(metadata or {})
         self.metadata.setdefault("model_version", "v10-ensemble-avg")
         self.metadata.setdefault("model_name", "poker44-bump-v10")
@@ -34,7 +33,7 @@ class V10Model:
         self.metadata.setdefault("conformal_threshold", 0.5)
         self.metadata["topk_cfg"] = self.topk_cfg
         self.metadata["scoring_head"] = (
-            f"topk_v1 (avg-ensemble, positive_fraction={self.topk_cfg.get('positive_fraction')})")
+            f"topk_v1 (avg-ensemble, positive_fraction={self.topk_cfg.get('positive_fraction', 0.13)})")
         self.threshold = 0.5
         self.head_mode = "topk"
         self.subsample = False
