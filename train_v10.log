@@ -1,0 +1,3 @@
+[v10] 526 chunks / 37 dates / 293 base feats (no cx_)
+[v10] LODO cross-date AP: single-lgb=0.8894  ENSEMBLE=0.8942
+[v10] saved models/bump_model_v10.joblib  (5 estimators, 293 feats)

@@ -1,0 +1,15 @@
+topk_sweep  —  20260702_062655
+log → logs/topk_sweep_20260702_062655.log
+dataset: v1.12 only  (data/benchmark_out)
+topk_fracs: [0.15, 0.16, 0.17, 0.18, 0.19, 0.2]
+
+Loaded 526 examples from v1.12
+Feature matrix: 526 × 293
+Dates: 2026-05-26 → 2026-07-01  (37 dates)
+Labels: 263 bot / 263 human
+
+==================================================================
+LODO — training v10 ensemble (one pass, caching raw scores)
+==================================================================
+  2026-05-26  n= 16  raw_mean=0.5138  (4s)
+  2026-05-27  n= 16  raw_mean=0.4909  (4s)

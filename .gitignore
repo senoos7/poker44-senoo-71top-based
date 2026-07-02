@@ -1,7 +1,7 @@
 __pycache__/
 *.pyc
 # /data
-*.log
+# *.log
 .venv/
 _sweep*.joblib
 models/_*.joblib

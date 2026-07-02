@@ -1,0 +1,101 @@
+[data] 526 chunks / 37 dates / 293 features
+       dates: 2026-05-26 → 2026-07-01
+       labels: 263 bot / 263 human
+
+============================================================
+Running LODO for v10 (3×LightGBM + ExtraTrees + RF, no weights)...
+============================================================
+  [v10] 2026-05-26  AP=0.9659  Reward=0.9341  FPR=0.000  Recall=0.875         (4s)
+  [v10] 2026-05-27  AP=0.9000  Reward=0.0000  FPR=0.125  Recall=0.750  CLIFF  (4s)
+  [v10] 2026-05-28  AP=0.9107  Reward=0.8253  FPR=0.000  Recall=0.667         (4s)
+  [v10] 2026-05-29  AP=0.9068  Reward=0.0000  FPR=0.125  Recall=0.625  CLIFF  (4s)
+  [v10] 2026-05-30  AP=0.9583  Reward=0.9146  FPR=0.000  Recall=0.833         (4s)
+  [v10] 2026-05-31  AP=0.7885  Reward=0.0000  FPR=0.333  Recall=0.667  CLIFF  (4s)
+  [v10] 2026-06-01  AP=0.8745  Reward=0.0000  FPR=0.143  Recall=0.714  CLIFF  (4s)
+  [v10] 2026-06-02  AP=0.9363  Reward=0.0000  FPR=0.125  Recall=0.750  CLIFF  (4s)
+  [v10] 2026-06-03  AP=0.9444  Reward=0.9056  FPR=0.000  Recall=0.833         (4s)
+  [v10] 2026-06-04  AP=0.9519  Reward=0.8375  FPR=0.000  Recall=0.625         (4s)
+  [v10] 2026-06-05  AP=0.9324  Reward=0.0000  FPR=0.125  Recall=0.875  CLIFF  (4s)
+  [v10] 2026-06-06  AP=0.8810  Reward=0.0000  FPR=0.286  Recall=0.714  CLIFF  (4s)
+  [v10] 2026-06-07  AP=0.8860  Reward=0.0000  FPR=0.125  Recall=0.625  CLIFF  (4s)
+  [v10] 2026-06-08  AP=0.7354  Reward=0.0000  FPR=0.125  Recall=0.625  CLIFF  (4s)
+  [v10] 2026-06-09  AP=1.0000  Reward=1.0000  FPR=0.000  Recall=1.000         (4s)
+  [v10] 2026-06-10  AP=0.7743  Reward=0.0000  FPR=0.250  Recall=0.500  CLIFF  (4s)
+  [v10] 2026-06-11  AP=1.0000  Reward=0.9125  FPR=0.000  Recall=0.750         (4s)
+  [v10] 2026-06-12  AP=0.8717  Reward=0.0000  FPR=0.375  Recall=0.750  CLIFF  (4s)
+  [v10] 2026-06-13  AP=0.8833  Reward=0.0000  FPR=0.333  Recall=0.833  CLIFF  (4s)
+  [v10] 2026-06-14  AP=0.8274  Reward=0.0000  FPR=0.571  Recall=0.714  CLIFF  (4s)
+  [v10] 2026-06-15  AP=1.0000  Reward=1.0000  FPR=0.000  Recall=1.000         (4s)
+  [v10] 2026-06-16  AP=0.9861  Reward=0.9472  FPR=0.000  Recall=0.875         (4s)
+  [v10] 2026-06-17  AP=1.0000  Reward=1.0000  FPR=0.000  Recall=1.000         (4s)
+  [v10] 2026-06-18  AP=0.9583  Reward=0.0000  FPR=0.125  Recall=0.875  CLIFF  (4s)
+  [v10] 2026-06-19  AP=0.9405  Reward=0.0000  FPR=0.286  Recall=0.857  CLIFF  (4s)
+  [v10] 2026-06-20  AP=0.9617  Reward=0.0000  FPR=0.143  Recall=0.857  CLIFF  (4s)
+  [v10] 2026-06-21  AP=0.9821  Reward=0.0000  FPR=0.143  Recall=0.857  CLIFF  (4s)
+  [v10] 2026-06-22  AP=1.0000  Reward=0.9417  FPR=0.000  Recall=0.833         (4s)
+  [v10] 2026-06-23  AP=0.8048  Reward=0.0000  FPR=0.143  Recall=0.571  CLIFF  (4s)
+  [v10] 2026-06-24  AP=0.8889  Reward=0.0000  FPR=0.667  Recall=0.833  CLIFF  (4s)
+  [v10] 2026-06-25  AP=0.9481  Reward=0.9162  FPR=0.000  Recall=0.857         (4s)
+  [v10] 2026-06-26  AP=0.9367  Reward=0.8589  FPR=0.000  Recall=0.714         (4s)
+  [v10] 2026-06-27  AP=0.7093  Reward=0.0000  FPR=0.333  Recall=0.333  CLIFF  (4s)
+  [v10] 2026-06-28  AP=0.8702  Reward=0.0000  FPR=0.375  Recall=0.875  CLIFF  (4s)
+  [v10] 2026-06-29  AP=0.9821  Reward=0.0000  FPR=0.143  Recall=1.000  CLIFF  (4s)
+  [v10] 2026-06-30  AP=0.9333  Reward=0.8983  FPR=0.000  Recall=0.833         (4s)
+  [v10] 2026-07-01  AP=0.8167  Reward=0.0000  FPR=0.143  Recall=0.429  CLIFF  (4s)
+
+v10 LODO done in 141s
+
+============================================================
+Running LODO for pareto_v3 (CatBoost + RF + ParetoForest, hw=2.0)...
+============================================================
+  [pareto] 2026-05-26  AP=0.9306  Reward=0.8236  FPR=0.000  Recall=0.625         (74s)
+  [pareto] 2026-05-27  AP=0.8821  Reward=0.0000  FPR=0.125  Recall=0.500  CLIFF  (73s)
+  [pareto] 2026-05-28  AP=0.9306  Reward=0.8382  FPR=0.000  Recall=0.667         (70s)
+  [pareto] 2026-05-29  AP=0.9318  Reward=0.0000  FPR=0.125  Recall=0.625  CLIFF  (75s)
+  [pareto] 2026-05-30  AP=0.9583  Reward=0.7979  FPR=0.000  Recall=0.500         (75s)
+  [pareto] 2026-05-31  AP=0.8552  Reward=0.0000  FPR=0.333  Recall=0.500  CLIFF  (72s)
+  [pareto] 2026-06-01  AP=0.8524  Reward=0.0000  FPR=0.143  Recall=0.571  CLIFF  (80s)
+  [pareto] 2026-06-02  AP=0.9260  Reward=0.8644  FPR=0.000  Recall=0.750         (79s)
+  [pareto] 2026-06-03  AP=0.9167  Reward=0.8292  FPR=0.000  Recall=0.667         (76s)
+  [pareto] 2026-06-04  AP=0.9000  Reward=0.8038  FPR=0.000  Recall=0.625         (73s)
+  [pareto] 2026-06-05  AP=0.9415  Reward=0.8307  FPR=0.000  Recall=0.625         (74s)
+  [pareto] 2026-06-06  AP=0.8976  Reward=0.0000  FPR=0.143  Recall=0.714  CLIFF  (71s)
+  [pareto] 2026-06-07  AP=0.8994  Reward=0.0000  FPR=0.125  Recall=0.625  CLIFF  (72s)
+  [pareto] 2026-06-08  AP=0.7828  Reward=0.5963  FPR=0.000  Recall=0.250         (75s)
+  [pareto] 2026-06-09  AP=0.9617  Reward=0.8251  FPR=0.000  Recall=0.571         (70s)
+  [pareto] 2026-06-10  AP=0.7791  Reward=0.0000  FPR=0.250  Recall=0.500  CLIFF  (73s)
+  [pareto] 2026-06-11  AP=1.0000  Reward=0.8688  FPR=0.000  Recall=0.625         (71s)
+  [pareto] 2026-06-12  AP=0.9010  Reward=0.0000  FPR=0.125  Recall=0.750  CLIFF  (71s)
+  [pareto] 2026-06-13  AP=0.8972  Reward=0.0000  FPR=0.167  Recall=0.500  CLIFF  (73s)
+  [pareto] 2026-06-14  AP=0.8425  Reward=0.0000  FPR=0.143  Recall=0.571  CLIFF  (73s)
+  [pareto] 2026-06-15  AP=1.0000  Reward=0.9500  FPR=0.000  Recall=0.857         (72s)
+  [pareto] 2026-06-16  AP=1.0000  Reward=0.8688  FPR=0.000  Recall=0.625         (73s)
+  [pareto] 2026-06-17  AP=1.0000  Reward=0.8250  FPR=0.000  Recall=0.500         (74s)
+  [pareto] 2026-06-18  AP=0.9260  Reward=0.0000  FPR=0.125  Recall=0.750  CLIFF  (74s)
+  [pareto] 2026-06-19  AP=0.9341  Reward=0.9071  FPR=0.000  Recall=0.857         (74s)
+  [pareto] 2026-06-20  AP=0.9325  Reward=0.8562  FPR=0.000  Recall=0.714         (73s)
+  [pareto] 2026-06-21  AP=0.9821  Reward=0.8884  FPR=0.000  Recall=0.714         (73s)
+  [pareto] 2026-06-22  AP=1.0000  Reward=0.9417  FPR=0.000  Recall=0.833         (74s)
+  [pareto] 2026-06-23  AP=0.8598  Reward=0.6588  FPR=0.000  Recall=0.286         (74s)
+  [pareto] 2026-06-24  AP=0.8593  Reward=0.7919  FPR=0.000  Recall=0.667         (71s)
+  [pareto] 2026-06-25  AP=0.9038  Reward=0.7875  FPR=0.000  Recall=0.571         (74s)
+  [pareto] 2026-06-26  AP=0.9367  Reward=0.8089  FPR=0.000  Recall=0.571         (74s)
+  [pareto] 2026-06-27  AP=0.7371  Reward=0.5958  FPR=0.000  Recall=0.333         (72s)
+  [pareto] 2026-06-28  AP=0.8326  Reward=0.0000  FPR=0.125  Recall=0.625  CLIFF  (72s)
+  [pareto] 2026-06-29  AP=0.9821  Reward=0.9384  FPR=0.000  Recall=0.857         (75s)
+  [pareto] 2026-06-30  AP=0.9333  Reward=0.8983  FPR=0.000  Recall=0.833         (77s)
+  [pareto] 2026-07-01  AP=0.7874  Reward=0.0000  FPR=0.143  Recall=0.286  CLIFF  (76s)
+
+pareto LODO done in 2726s
+
+
+============================================================================
+FAIR LODO SUMMARY  (37 dates, both models retrained per fold)
+============================================================================
+Model                                         AP  Recall     FPR   Reward  Cliff%
+----------------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/root/Skip/poker/poker44-skip/lodo_fair_compare.py", line 183, in <module>
+    print(f"{'v10  (3×LGB + ET + RF,   hw=1.0)':<40} {a10['AP']:7.4f} {a10['Recall']:7.4f} {a10['FPR']:7.4f} {a10['Reward']:8.4f} {a10['Cliff%']:7.1f}")
+                                                                                                                                   ~~~^^^^^^^^^^
+KeyError: 'Cliff%'

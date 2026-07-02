@@ -1,0 +1,223 @@
+Feature-v2 upgrade LODO  —  20260702_085538
+log → logs/train_featv2_20260702_085538.log
+
+Computing features_v1 (293 feats) ...
+  shape: (526, 293)
+Computing features_v2 (367 feats) ...
+  shape: (526, 367)
+
+74 new features in v2:
+  schema_action_count_lag1_corr
+  schema_action_entropy_trend
+  schema_aggression_first_half
+  schema_aggression_half_delta
+  schema_aggression_lag1_corr
+  schema_aggression_second_half
+  schema_aggression_trend
+  schema_bet_size_bucket_top_share
+  schema_bet_size_bucket_unique_share
+  schema_bet_to_pot_lag1_corr
+  schema_bet_to_pot_ratio_max
+  schema_bet_to_pot_ratio_mean
+  schema_bet_to_pot_ratio_min
+  schema_bet_to_pot_ratio_q10
+  schema_bet_to_pot_ratio_q50
+  schema_bet_to_pot_ratio_q90
+  schema_bet_to_pot_ratio_std
+  schema_bet_to_pot_trend
+  schema_consistent_sizing_hand_rate
+  schema_entropy_first_half
+  schema_entropy_half_delta
+  schema_entropy_second_half
+  schema_flop_reach_rate_max
+  schema_flop_reach_rate_mean
+  schema_flop_reach_rate_min
+  schema_flop_reach_rate_q10
+  schema_flop_reach_rate_q50
+  schema_flop_reach_rate_q90
+  schema_flop_reach_rate_std
+  schema_fold_to_aggression_rate_max
+  schema_fold_to_aggression_rate_mean
+  schema_fold_to_aggression_rate_min
+  schema_fold_to_aggression_rate_q10
+  schema_fold_to_aggression_rate_q50
+  schema_fold_to_aggression_rate_q90
+  schema_fold_to_aggression_rate_std
+  schema_passive_hand_rate
+  schema_postflop_aggression_share_max
+  schema_postflop_aggression_share_mean
+  schema_postflop_aggression_share_min
+  schema_postflop_aggression_share_q10
+  schema_postflop_aggression_share_q50
+  schema_postflop_aggression_share_q90
+  schema_postflop_aggression_share_std
+  schema_preflop_aggression_share_max
+  schema_preflop_aggression_share_mean
+  schema_preflop_aggression_share_min
+  schema_preflop_aggression_share_q10
+  schema_preflop_aggression_share_q50
+  schema_preflop_aggression_share_q90
+  schema_preflop_aggression_share_std
+  schema_reraise_rate_max
+  schema_reraise_rate_mean
+  schema_reraise_rate_min
+  schema_reraise_rate_q10
+  schema_reraise_rate_q50
+  schema_reraise_rate_q90
+  schema_reraise_rate_std
+  schema_river_reach_rate_max
+  schema_river_reach_rate_mean
+  schema_river_reach_rate_min
+  schema_river_reach_rate_q10
+  schema_river_reach_rate_q50
+  schema_river_reach_rate_q90
+  schema_river_reach_rate_std
+  schema_short_hand_rate
+  schema_sizing_cv_max
+  schema_sizing_cv_mean
+  schema_sizing_cv_min
+  schema_sizing_cv_q10
+  schema_sizing_cv_q50
+  schema_sizing_cv_q90
+  schema_sizing_cv_std
+  schema_very_high_aggression_hand_rate
+
+==================================================================
+LODO  [v10  features_v1]  (293 features, topk_frac=0.15)
+==================================================================
+  2026-05-26  n=16  AP=0.9503  Recall=0.2500  FPR=0.0000  Reward=0.7052  (4s)
+  2026-05-27  n=16  AP=0.8613  Recall=0.2500  FPR=0.0000  Reward=0.6474  (4s)
+  2026-05-28  n=12  AP=0.9107  Recall=0.1667  FPR=0.0000  Reward=0.6503  (4s)
+  2026-05-29  n=16  AP=0.9068  Recall=0.2500  FPR=0.0000  Reward=0.6769  (4s)
+  2026-05-30  n=12  AP=0.9583  Recall=0.1667  FPR=0.0000  Reward=0.6813  (4s)
+  2026-05-31  n=12  AP=0.7885  Recall=0.1667  FPR=0.0000  Reward=0.5709  (4s)
+  2026-06-01  n=14  AP=0.8745  Recall=0.2857  FPR=0.0000  Reward=0.6685  (4s)
+  2026-06-02  n=16  AP=0.9363  Recall=0.2500  FPR=0.0000  Reward=0.6961  (4s)
+  2026-06-03  n=12  AP=0.9444  Recall=0.1667  FPR=0.0000  Reward=0.6722  (4s)
+  2026-06-04  n=16  AP=0.9464  Recall=0.2500  FPR=0.0000  Reward=0.7027  (4s)
+  2026-06-05  n=16  AP=0.9324  Recall=0.2500  FPR=0.0000  Reward=0.6936  (4s)
+  2026-06-06  n=14  AP=0.8963  Recall=0.2857  FPR=0.0000  Reward=0.6826  (4s)
+  2026-06-07  n=16  AP=0.8860  Recall=0.2500  FPR=0.0000  Reward=0.6634  (4s)
+  2026-06-08  n=16  AP=0.7354  Recall=0.2500  FPR=0.0000  Reward=0.5655  (4s)
+  2026-06-09  n=14  AP=1.0000  Recall=0.2857  FPR=0.0000  Reward=0.7500  (4s)
+  2026-06-10  n=16  AP=0.7743  Recall=0.2500  FPR=0.0000  Reward=0.5908  (4s)
+  2026-06-11  n=16  AP=1.0000  Recall=0.2500  FPR=0.0000  Reward=0.7375  (4s)
+  2026-06-12  n=16  AP=0.8717  Recall=0.2500  FPR=0.0000  Reward=0.6541  (4s)
+  2026-06-13  n=12  AP=0.9306  Recall=0.1667  FPR=0.0000  Reward=0.6632  (4s)
+  2026-06-14  n=14  AP=0.8274  Recall=0.2857  FPR=0.0000  Reward=0.6378  (4s)
+  2026-06-15  n=14  AP=1.0000  Recall=0.2857  FPR=0.0000  Reward=0.7500  (4s)
+  2026-06-16  n=16  AP=0.9861  Recall=0.2500  FPR=0.0000  Reward=0.7285  (4s)
+  2026-06-17  n=12  AP=1.0000  Recall=0.1667  FPR=0.0000  Reward=0.7083  (4s)
+  2026-06-18  n=16  AP=0.9583  Recall=0.2500  FPR=0.0000  Reward=0.7104  (4s)
+  2026-06-19  n=14  AP=0.9405  Recall=0.2857  FPR=0.0000  Reward=0.7113  (4s)
+  2026-06-20  n=14  AP=0.9617  Recall=0.2857  FPR=0.0000  Reward=0.7251  (4s)
+  2026-06-21  n=14  AP=0.9821  Recall=0.2857  FPR=0.0000  Reward=0.7384  (4s)
+  2026-06-22  n=12  AP=1.0000  Recall=0.1667  FPR=0.0000  Reward=0.7083  (4s)
+  2026-06-23  n=14  AP=0.8028  Recall=0.2857  FPR=0.0000  Reward=0.6218  (4s)
+  2026-06-24  n=12  AP=0.8426  Recall=0.1667  FPR=0.0000  Reward=0.6060  (4s)
+  2026-06-25  n=14  AP=0.9481  Recall=0.2857  FPR=0.0000  Reward=0.7162  (4s)
+  2026-06-26  n=14  AP=0.9367  Recall=0.2857  FPR=0.0000  Reward=0.7089  (4s)
+  2026-06-27  n=12  AP=0.7252  Recall=0.1667  FPR=0.0000  Reward=0.5297  (4s)
+  2026-06-28  n=16  AP=0.8550  Recall=0.2500  FPR=0.0000  Reward=0.6432  (4s)
+  2026-06-29  n=14  AP=0.9617  Recall=0.2857  FPR=0.0000  Reward=0.7251  (4s)
+  2026-06-30  n=12  AP=0.9333  Recall=0.1667  FPR=0.0000  Reward=0.6650  (4s)
+  2026-07-01  n=14  AP=0.7952  Recall=0.2857  FPR=0.0000  Reward=0.6169  (4s)
+
+  [v10  features_v1] AGGREGATE  AP=0.9071  Recall=0.2400  FPR=0.0000  Reward=0.6736  Cliffs=0/37  (152s)
+
+==================================================================
+LODO  [v10v2 features_v2]  (367 features, topk_frac=0.15)
+==================================================================
+  2026-05-26  n=16  AP=1.0000  Recall=0.2500  FPR=0.0000  Reward=0.7375  (4s)
+  2026-05-27  n=16  AP=0.9363  Recall=0.2500  FPR=0.0000  Reward=0.6961  (4s)
+  2026-05-28  n=12  AP=0.9484  Recall=0.1667  FPR=0.0000  Reward=0.6748  (4s)
+  2026-05-29  n=16  AP=0.9594  Recall=0.2500  FPR=0.0000  Reward=0.7111  (5s)
+  2026-05-30  n=12  AP=0.9444  Recall=0.1667  FPR=0.0000  Reward=0.6722  (4s)
+  2026-05-31  n=12  AP=0.8774  Recall=0.1667  FPR=0.0000  Reward=0.6286  (4s)
+  2026-06-01  n=14  AP=0.7690  Recall=0.1429  FPR=0.1429  Reward=0.0000  CLIFF  (4s)
+  2026-06-02  n=16  AP=0.9427  Recall=0.2500  FPR=0.0000  Reward=0.7003  (4s)
+  2026-06-03  n=12  AP=0.9444  Recall=0.1667  FPR=0.0000  Reward=0.6722  (4s)
+  2026-06-04  n=16  AP=1.0000  Recall=0.2500  FPR=0.0000  Reward=0.7375  (4s)
+  2026-06-05  n=16  AP=0.9318  Recall=0.2500  FPR=0.0000  Reward=0.6932  (4s)
+  2026-06-06  n=14  AP=0.9240  Recall=0.2857  FPR=0.0000  Reward=0.7006  (4s)
+  2026-06-07  n=16  AP=0.8610  Recall=0.2500  FPR=0.0000  Reward=0.6472  (4s)
+  2026-06-08  n=16  AP=0.7545  Recall=0.2500  FPR=0.0000  Reward=0.5779  (4s)
+  2026-06-09  n=14  AP=1.0000  Recall=0.2857  FPR=0.0000  Reward=0.7500  (4s)
+  2026-06-10  n=16  AP=0.8329  Recall=0.2500  FPR=0.0000  Reward=0.6289  (4s)
+  2026-06-11  n=16  AP=0.9705  Recall=0.2500  FPR=0.0000  Reward=0.7183  (5s)
+  2026-06-12  n=16  AP=0.8763  Recall=0.2500  FPR=0.0000  Reward=0.6571  (4s)
+  2026-06-13  n=12  AP=0.9151  Recall=0.1667  FPR=0.0000  Reward=0.6531  (4s)
+  2026-06-14  n=14  AP=0.9214  Recall=0.2857  FPR=0.0000  Reward=0.6989  (5s)
+  2026-06-15  n=14  AP=1.0000  Recall=0.2857  FPR=0.0000  Reward=0.7500  (5s)
+  2026-06-16  n=16  AP=1.0000  Recall=0.2500  FPR=0.0000  Reward=0.7375  (4s)
+  2026-06-17  n=12  AP=1.0000  Recall=0.1667  FPR=0.0000  Reward=0.7083  (4s)
+  2026-06-18  n=16  AP=0.9069  Recall=0.2500  FPR=0.0000  Reward=0.6770  (4s)
+  2026-06-19  n=14  AP=1.0000  Recall=0.2857  FPR=0.0000  Reward=0.7500  (5s)
+  2026-06-20  n=14  AP=0.9821  Recall=0.2857  FPR=0.0000  Reward=0.7384  (4s)
+  2026-06-21  n=14  AP=1.0000  Recall=0.2857  FPR=0.0000  Reward=0.7500  (4s)
+  2026-06-22  n=12  AP=1.0000  Recall=0.1667  FPR=0.0000  Reward=0.7083  (4s)
+  2026-06-23  n=14  AP=0.8802  Recall=0.2857  FPR=0.0000  Reward=0.6721  (5s)
+  2026-06-24  n=12  AP=0.8774  Recall=0.1667  FPR=0.0000  Reward=0.6286  (4s)
+  2026-06-25  n=14  AP=0.9478  Recall=0.2857  FPR=0.0000  Reward=0.7161  (4s)
+  2026-06-26  n=14  AP=0.8857  Recall=0.2857  FPR=0.0000  Reward=0.6757  (5s)
+  2026-06-27  n=12  AP=0.8417  Recall=0.1667  FPR=0.0000  Reward=0.6054  (5s)
+  2026-06-28  n=16  AP=0.8803  Recall=0.2500  FPR=0.0000  Reward=0.6597  (5s)
+  2026-06-29  n=14  AP=0.9481  Recall=0.2857  FPR=0.0000  Reward=0.7162  (5s)
+  2026-06-30  n=12  AP=0.9444  Recall=0.1667  FPR=0.0000  Reward=0.6722  (5s)
+  2026-07-01  n=14  AP=0.9123  Recall=0.2857  FPR=0.0000  Reward=0.6930  (5s)
+
+  [v10v2 features_v2] AGGREGATE  AP=0.9275  Recall=0.2362  FPR=0.0039  Reward=0.6707  Cliffs=1/37  (167s)
+
+Final fit on all data → models/bump_model_v10v2.joblib ...
+  saved models/bump_model_v10v2.joblib
+
+====================================================================
+SUMMARY  —  same v10 ensemble, features_v1 vs features_v2
+====================================================================
+  Variant                 Feats       AP   Recall      FPR    Reward  Cliffs
+  ----------------------  -----  -------  -------  -------  --------  --------
+  v10  (features_v1)        293   0.9071   0.2400   0.0000    0.6736  0/37
+  v10v2 (features_v2)       367   0.9275   0.2362   0.0039    0.6707  1/37
+  Delta (v2 − v1)           +74    +0.0204  -0.0039            -0.0029
+
+Per-date AP:  v1   v2   Δ
+---------------------------------------- 
+  2026-05-26   0.9503  1.0000  +0.0497 ▲
+  2026-05-27   0.8613  0.9363  +0.0750 ▲
+  2026-05-28   0.9107  0.9484  +0.0377 ▲
+  2026-05-29   0.9068  0.9594  +0.0526 ▲
+  2026-05-30   0.9583  0.9444  -0.0139 ▼
+  2026-05-31   0.7885  0.8774  +0.0889 ▲
+  2026-06-01   0.8745  0.7690  -0.1055 ▼
+  2026-06-02   0.9363  0.9427  +0.0064 ▲
+  2026-06-03   0.9444  0.9444  +0.0000  
+  2026-06-04   0.9464  1.0000  +0.0536 ▲
+  2026-06-05   0.9324  0.9318  -0.0006  
+  2026-06-06   0.8963  0.9240  +0.0278 ▲
+  2026-06-07   0.8860  0.8610  -0.0250 ▼
+  2026-06-08   0.7354  0.7545  +0.0191 ▲
+  2026-06-09   1.0000  1.0000  +0.0000  
+  2026-06-10   0.7743  0.8329  +0.0585 ▲
+  2026-06-11   1.0000  0.9705  -0.0295 ▼
+  2026-06-12   0.8717  0.8763  +0.0046 ▲
+  2026-06-13   0.9306  0.9151  -0.0155 ▼
+  2026-06-14   0.8274  0.9214  +0.0940 ▲
+  2026-06-15   1.0000  1.0000  +0.0000  
+  2026-06-16   0.9861  1.0000  +0.0139 ▲
+  2026-06-17   1.0000  1.0000  +0.0000  
+  2026-06-18   0.9583  0.9069  -0.0515 ▼
+  2026-06-19   0.9405  1.0000  +0.0595 ▲
+  2026-06-20   0.9617  0.9821  +0.0204 ▲
+  2026-06-21   0.9821  1.0000  +0.0179 ▲
+  2026-06-22   1.0000  1.0000  +0.0000  
+  2026-06-23   0.8028  0.8802  +0.0773 ▲
+  2026-06-24   0.8426  0.8774  +0.0348 ▲
+  2026-06-25   0.9481  0.9478  -0.0002  
+  2026-06-26   0.9367  0.8857  -0.0510 ▼
+  2026-06-27   0.7252  0.8417  +0.1165 ▲
+  2026-06-28   0.8550  0.8803  +0.0253 ▲
+  2026-06-29   0.9617  0.9481  -0.0137 ▼
+  2026-06-30   0.9333  0.9444  +0.0111 ▲
+  2026-07-01   0.7952  0.9123  +0.1171 ▲
+
+Log saved to: logs/train_featv2_20260702_085538.log
